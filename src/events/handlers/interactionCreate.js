@@ -3,7 +3,6 @@ const chalk = require("chalk");
 const config = require('../../../config.json');
 const path = require('path');
 const fs = require('fs');
-const { checkCommandPremium } = require('../../functions/handlers/premiumHandler');
 
 const errorsDir = path.join(__dirname, '../../../errors');
 
@@ -45,11 +44,24 @@ module.exports = {
     async execute(interaction, client) {
 
         if (interaction.isChatInputCommand()) {
+            // Safety check: ensure commands are loaded
+            if (!client.commands) {
+                console.log(chalk.yellow('Commands not yet loaded. Please wait...'));
+                return await interaction.reply({
+                    content: '⏳ Bot is still starting up. Please try again in a moment!',
+                    flags: MessageFlags.Ephemeral
+                }).catch(() => {});
+            }
+            
             const command = client.commands.get(interaction.commandName);
 
             if (!command) {
                 console.log(chalk.yellow(`Command "${interaction.commandName}" not found.`));
                 return;
+            }
+            
+            if (!interaction.deferred && !interaction.replied) {
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(() => {});
             }
 
             if (command.adminOnly) {
@@ -59,9 +71,8 @@ module.exports = {
                         .setColor('Blue')
                         .setDescription(`\`❌\` | This command is admin-only. You cannot run this command.`)
 
-                    return await interaction.reply({
-                        embeds: [embed],
-                        flags: MessageFlags.Ephemeral
+                    return await interaction.editReply({
+                        embeds: [embed]
                     });
                 }
             }
@@ -72,25 +83,23 @@ module.exports = {
                         .setColor('Blue')
                         .setDescription(`\`❌\` | This command is owner-only. You cannot run this command.`)
 
-                    return await interaction.reply({
-                        embeds: [embed],
-                        flags: MessageFlags.Ephemeral
+                    return await interaction.editReply({
+                        embeds: [embed]
                     });
                 }
             }
 
             if (command.userPermissions) {
-                const memberPermissions = interaction.member.permissions;
-                const missingPermissions = command.userPermissions.filter(perm => !memberPermissions.has(perm));
+                const userPermissions = interaction.member.permissions;
+                const missingPermissions = command.userPermissions.filter(perm => !userPermissions.has(perm));
 
                 if (missingPermissions.length) {
                     const embed = new EmbedBuilder()
                         .setColor('Blue')
                         .setDescription(`\`❌\` | You lack the necessary permissions to execute this command: \`\`\`${missingPermissions.join(", ")}\`\`\``)
 
-                    return await interaction.reply({
-                        embeds: [embed],
-                        flags: MessageFlags.Ephemeral
+                    return await interaction.editReply({
+                        embeds: [embed]
                     });
                 }
             }
@@ -104,9 +113,8 @@ module.exports = {
                         .setColor('Blue')
                         .setDescription(`\`❌\` | You don't have the required role(s) to use this command.`);
 
-                    return await interaction.reply({
-                        embeds: [embed],
-                        flags: MessageFlags.Ephemeral
+                    return await interaction.editReply({
+                        embeds: [embed]
                     });
                 }
             }
@@ -119,9 +127,8 @@ module.exports = {
                         .setColor('Blue')
                         .setDescription(`\`❌\` | I lack the necessary permissions to execute this command: \`\`\`${missingBotPermissions.join(", ")}\`\`\``)
 
-                    return await interaction.reply({
-                        embeds: [embed],
-                        flags: MessageFlags.Ephemeral
+                    return await interaction.editReply({
+                        embeds: [embed]
                     });
                 }
             }
@@ -132,20 +139,8 @@ module.exports = {
                     .setColor('Orange')
                     .setDescription(`\`⛔\` | This command is currently disabled. Please try again later.`);
 
-                return await interaction.reply({
-                    embeds: [embed],
-                    flags: MessageFlags.Ephemeral
-                });
-            }
-
-            const premiumCheck = checkCommandPremium(command, interaction.member, interaction.user.id);
-            if (!premiumCheck.allowed) {
-                const embed = new EmbedBuilder()
-                    .setColor('Gold')
-                    .setDescription(premiumCheck.message);
-                return await interaction.reply({
-                    embeds: [embed],
-                    flags: MessageFlags.Ephemeral
+                return await interaction.editReply({
+                    embeds: [embed]
                 });
             }
 
@@ -164,9 +159,8 @@ module.exports = {
                         .setColor('Blue')
                         .setDescription(`\`❌\` | Please wait **${timeLeft.toFixed(1)}** more second(s) before reusing the command.`)
 
-                    return await interaction.reply({
-                        embeds: [embed],
-                        flags: MessageFlags.Ephemeral
+                    return await interaction.editReply({
+                        embeds: [embed]
                     });
                 }
             }
@@ -237,5 +231,5 @@ module.exports = {
         //         }
         //     }
         // }
-    },
-};
+    }
+}

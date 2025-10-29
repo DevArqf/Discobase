@@ -2,7 +2,6 @@ const chalk = require("chalk");
 const config = require('../../../config.json');
 const { EmbedBuilder, MessageFlags } = require('discord.js');
 const { getSimilarCommands } = require('../../functions/handlers/similarity');
-const { checkCommandPremium } = require('../../functions/handlers/premiumHandler');
 const path = require('path');
 const fs = require('fs');
 
@@ -112,17 +111,6 @@ module.exports = {
 
             return await message.reply({
                 embeds: [embed],
-            });
-        }
-
-        const premiumCheck = checkCommandPremium(command, message.member, message.author.id);
-        if (!premiumCheck.allowed) {
-            const embed = new EmbedBuilder()
-                .setColor('Gold')
-                .setDescription(premiumCheck.message);
-
-            return await message.reply({
-                embeds: [embed]
             });
         }
 

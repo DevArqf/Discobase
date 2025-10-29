@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const chalk = require('chalk');
 const { ActivityType } = require('discord.js');
 const { prefixHandler } = require('../../functions/handlers/prefixHandler');
-const { handleCommands } = require('../../functions/handlers/handleCommands');
 const path = require('path');
 const fs = require('fs');
 
@@ -212,6 +211,5 @@ module.exports = {
         }
 
         prefixHandler(client, path.join(process.cwd(), 'src/messages'));
-        handleCommands(client, path.join(process.cwd(), 'src/commands'));
     },
 };

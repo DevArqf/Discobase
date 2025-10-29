@@ -113,8 +113,6 @@ Use these powerful options in any command file:
 | `cooldown`        | number    | Cooldown in seconds before reuse (default: 3).                              |
 | `disabled`        | boolean   | **New in 2.5** — Easily disable buggy or incomplete commands.                |
 | `requiredRoles`   | array     | **New in 2.5** — Array of server role IDs required to run this command.      |
-| `premiumOnly`     | boolean   | **New** — Requires any premium access to use this command.                   |
-| `premiumTier`     | string    | **New** — Requires specific premium tier ('basic', 'premium', or 'vip').    |
 
 ---
 
@@ -207,58 +205,6 @@ npm run manage
 - ⏸️ Pause/Resume commands without deleting them
 - 🗑️ Delete commands and events with confirmation
 - 📁 Organized by categories for easy navigation
-
----
-
-## ⭐ Premium System
-
-DiscoBase now includes a built-in premium system for monetizing your bot!
-
-### Configuration
-
-Edit `premium.json` to configure your premium system:
-
-```json
-{
-  "enabled": true,
-  "premiumRoles": ["PREMIUM_ROLE_ID"],
-  "premiumUsers": ["USER_ID_1", "USER_ID_2"],
-  "tiers": {
-    "basic": {
-      "roleIds": ["BASIC_ROLE_ID"],
-      "commands": ["command1", "command2"]
-    },
-    "premium": {
-      "roleIds": ["PREMIUM_ROLE_ID"],
-      "commands": ["command3", "command4"]
-    },
-    "vip": {
-      "roleIds": ["VIP_ROLE_ID"],
-      "commands": ["command5"]
-    }
-  }
-}
-```
-
-### Usage in Commands
-
-Add premium requirements to any command:
-
-```js
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('premium-command')
-        .setDescription('A premium-only command'),
-    
-    premiumOnly: true,  // Requires any premium access
-    // OR
-    premiumTier: 'vip', // Requires specific tier
-    
-    async execute(interaction, client) {
-        // Your premium command logic
-    }
-};
-```
 
 ---
 

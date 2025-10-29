@@ -26,6 +26,8 @@ const { eventsHandler } = require('./functions/handlers/handelEvents');
 const { checkMissingIntents } = require('./functions/handlers/requiredIntents');
 const { antiCrash } = require('./functions/handlers/antiCrash');
 const { initActivityTracker } = require('./functions/handlers/activityTracker');
+const { handleCommands } = require('./functions/handlers/handleCommands');
+const { Collection } = require('discord.js');
 require('./functions/handlers/watchFolders');
 
 // ──────────────[ Setup Paths ]──────────────
@@ -187,9 +189,17 @@ function logger(type, message) {
 (async () => {
     gradient = await loadGradient();
     await printAsciiArt();
+    
+    // Initialize client.commands collection before login
+    client.commands = new Collection();
+    
     try {
         await client.login(config.bot.token);
         logger('SUCCESS', 'Bot logged in successfully!');
+        
+        // Load commands immediately after login
+        await handleCommands(client, path.join(__dirname, './commands'));
+        logger('SUCCESS', 'Commands loaded and registered!');
         
         if (fs.existsSync(adminFolderPath) && fs.existsSync(dashboardFilePath)) {
             require(dashboardFilePath);
