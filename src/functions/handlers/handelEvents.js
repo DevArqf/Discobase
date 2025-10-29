@@ -28,7 +28,7 @@ function ensureErrorDirectoryExists() {
 
 function logErrorToFile(error) {
     try {
-        const discobasePath = path.join(__dirname, '../discobase.json');
+        const discobasePath = path.join(__dirname, '../../../discobase.json');
         if (fs.existsSync(discobasePath)) {
             const discobaseConfig = JSON.parse(fs.readFileSync(discobasePath, 'utf8'));
             if (discobaseConfig.errorLogging && discobaseConfig.errorLogging.enabled === false) {

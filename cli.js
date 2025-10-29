@@ -26,9 +26,66 @@ const logWithStyle = (message, type = 'info') => {
     console.log(styled[type] || message);
 };
 
-// Templates for different file types
-const templates = {
-    command: `const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+// Function to generate command template with selected builders
+const generateCommandTemplate = (builders = []) => {
+    let imports = ['SlashCommandBuilder'];
+    let exampleCode = '';
+
+    if (builders.includes('embed')) {
+        imports.push('EmbedBuilder');
+        exampleCode += `
+        // Example: Create an embed
+        // const embed = new EmbedBuilder()
+        //     .setColor('Blue')
+        //     .setTitle('Title')
+        //     .setDescription('Description');
+        // await interaction.reply({ embeds: [embed] });`;
+    }
+
+    if (builders.includes('button')) {
+        imports.push('ButtonBuilder', 'ButtonStyle', 'ActionRowBuilder');
+        exampleCode += `
+        // Example: Create a button
+        // const button = new ButtonBuilder()
+        //     .setCustomId('button_id')
+        //     .setLabel('Click Me')
+        //     .setStyle(ButtonStyle.Primary);
+        // const row = new ActionRowBuilder().addComponents(button);
+        // await interaction.reply({ content: 'Message with button', components: [row] });`;
+    }
+
+    if (builders.includes('selectMenu')) {
+        imports.push('StringSelectMenuBuilder', 'StringSelectMenuOptionBuilder', 'ActionRowBuilder');
+        exampleCode += `
+        // Example: Create a select menu
+        // const select = new StringSelectMenuBuilder()
+        //     .setCustomId('select_id')
+        //     .setPlaceholder('Make a selection')
+        //     .addOptions(
+        //         new StringSelectMenuOptionBuilder().setLabel('Option 1').setValue('option1'),
+        //         new StringSelectMenuOptionBuilder().setLabel('Option 2').setValue('option2')
+        //     );
+        // const row = new ActionRowBuilder().addComponents(select);
+        // await interaction.reply({ content: 'Select an option', components: [row] });`;
+    }
+
+    if (builders.includes('modal')) {
+        imports.push('ModalBuilder', 'TextInputBuilder', 'TextInputStyle', 'ActionRowBuilder');
+        exampleCode += `
+        // Example: Show a modal
+        // const modal = new ModalBuilder()
+        //     .setCustomId('modal_id')
+        //     .setTitle('Modal Title');
+        // const input = new TextInputBuilder()
+        //     .setCustomId('input_id')
+        //     .setLabel('Input Label')
+        //     .setStyle(TextInputStyle.Short);
+        // const row = new ActionRowBuilder().addComponents(input);
+        // modal.addComponents(row);
+        // await interaction.showModal(modal);`;
+    }
+
+    return `const { ${imports.join(', ')} } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -36,9 +93,14 @@ module.exports = {
         .setDescription('Describe your command here.'),
 
     async execute(interaction, client) {
-        // Command execution logic goes here
+        // Command execution logic goes here${exampleCode}
     }
-};`,
+};`;
+};
+
+// Templates for different file types
+const templates = {
+    command: generateCommandTemplate([]),
     prefix: `//! This is a basic structure for a prefix command in discoBase using discord.js
 
 module.exports = {
@@ -83,6 +145,30 @@ const createFile = (filePath, template) => {
         message: `📝 Enter the name of the ${fileType} file (without extension):`,
         initial: '',
     });
+
+    let selectedBuilders = [];
+    if (fileType === 'command') {
+        const useBuilders = await confirm({
+            message: '🛠️ Do you want to use Discord.js builders in this command?',
+        });
+
+        if (useBuilders) {
+            const builderOptions = await select({
+                message: '📦 Select builders to include (you can add more later):',
+                options: [
+                    { value: 'embed', label: 'EmbedBuilder' },
+                    { value: 'button', label: 'ButtonBuilder & ActionRowBuilder' },
+                    { value: 'selectMenu', label: 'StringSelectMenuBuilder' },
+                    { value: 'modal', label: 'ModalBuilder & TextInputBuilder' },
+                    { value: 'none', label: 'None - I\'ll add them manually' }
+                ],
+            });
+
+            if (builderOptions !== 'none') {
+                selectedBuilders.push(builderOptions);
+            }
+        }
+    }
 
     const folderMap = {
         command: 'commands',
@@ -156,6 +242,9 @@ const createFile = (filePath, template) => {
     if (fs.existsSync(filePath)) {
         logWithStyle(`⚠️ File already exists: ${chalk.yellowBright(filePath)}`, 'error');
     } else {
-        createFile(filePath, templates[fileType]);
+        const template = fileType === 'command' && selectedBuilders.length > 0 
+            ? generateCommandTemplate(selectedBuilders) 
+            : templates[fileType];
+        createFile(filePath, template);
     }
 })();

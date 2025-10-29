@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node .",
     "generate": "node cli.js",
+    "manage": "node manage.js",
     "dev": "nodemon src/index.js"
   },
   "dependencies": {

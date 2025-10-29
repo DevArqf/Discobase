@@ -5,6 +5,7 @@ const chalk = require('chalk');
 const config = require('../../../config.json');
 const path = require('path');
 const chokidar = require('chokidar');
+const gradient = require('gradient-string');
 const activities = [];
 
 const addActivity = (action, filePath) => {

@@ -3,6 +3,7 @@ const chalk = require("chalk");
 const config = require('../../../config.json');
 const path = require('path');
 const fs = require('fs');
+const { checkCommandPremium } = require('../../functions/handlers/premiumHandler');
 
 const errorsDir = path.join(__dirname, '../../../errors');
 
@@ -15,7 +16,7 @@ function ensureErrorDirectoryExists() {
 function logErrorToFile(error) {
     try {
         // Check if error logging is enabled in discobase.json
-        const discobasePath = path.join(__dirname, '../discobase.json');
+        const discobasePath = path.join(__dirname, '../../../discobase.json');
         if (fs.existsSync(discobasePath)) {
             const discobaseConfig = JSON.parse(fs.readFileSync(discobasePath, 'utf8'));
             if (discobaseConfig.errorLogging && discobaseConfig.errorLogging.enabled === false) {
@@ -137,7 +138,16 @@ module.exports = {
                 });
             }
 
-
+            const premiumCheck = checkCommandPremium(command, interaction.member, interaction.user.id);
+            if (!premiumCheck.allowed) {
+                const embed = new EmbedBuilder()
+                    .setColor('Gold')
+                    .setDescription(premiumCheck.message);
+                return await interaction.reply({
+                    embeds: [embed],
+                    flags: MessageFlags.Ephemeral
+                });
+            }
 
             const cooldowns = client.cooldowns || new Map();
             const now = Date.now();
