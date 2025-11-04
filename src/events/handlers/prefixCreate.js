@@ -95,23 +95,20 @@ module.exports = {
             }
         }
 
-
-
-        if (command.devOnly) {
-            if (!config.bot.developerCommandsServerIds.includes(message.guild.id)) {
-                return;
-            }
-        }
-
-
         if (command.disabled) {
             const embed = new EmbedBuilder()
                 .setColor('Orange')
                 .setDescription(`\`⛔\` | This command is currently disabled. Please try again later.`);
 
             return await message.reply({
-                embeds: [embed],
+                embeds: [embed]
             });
+        }
+
+        if (command.devOnly) {
+            if (!config.bot.developerCommandsServerIds.includes(message.guild.id)) {
+                return;
+            }
         }
 
         if (!client.cooldowns) {
