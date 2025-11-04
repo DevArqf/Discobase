@@ -59,6 +59,7 @@ Below is a sneak peek at the new **Discobase Dashboard**:
 - 🎮 **Presence Manager**: Easily control your bot's status, activity, and type through `discobase.json`.
 - 📊 **Discobase Dashboard**: Live stats, activities, & easy settings.
 - ⚡ **Generate Command**: `npm run generate` instantly scaffolds new commands/events!
+- 💻 **Manage Command**: `npm run manage` Enable or disable slash or prefix commands/events!
 
 ---
 
